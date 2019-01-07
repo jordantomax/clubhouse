@@ -1,0 +1,14 @@
+{
+  "name": "clubhouse",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jordan Cooperman",
+  "license": "MIT",
+  "bin": {
+    "clubhouse": "index.js"
+  },
+  "dependencies": {
+    "commander": "^2.19.0",
+    "node-fetch": "^2.3.0"
+  }
+}
