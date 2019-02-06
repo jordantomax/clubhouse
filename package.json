@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "commander": "^2.19.0",
+    "googleapis": "^37.1.0",
     "node-fetch": "^2.3.0"
   }
 }
