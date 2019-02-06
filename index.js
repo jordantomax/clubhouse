@@ -64,7 +64,28 @@ async function search (path, stories) {
   return newStories
 }
 
-async function listPointsByTeam (numberOfDays, endDate = new Date()) {
+function massagePointsByTeam (teams, stories) {
+  const pointsByTeam = {}
+  for (let i = 0; i < teams.length; i++) {
+    const team = teams[i].name
+
+    pointsByTeam[team] = {
+      feature: 0,
+      chore: 0,
+      bug: 0
+    }
+
+    stories.filter(story => {
+      return teams[i].project_ids.includes(story.project_id)
+    }).forEach(story => {
+      pointsByTeam[team][story.story_type] += story.estimate || 0
+    })
+  }
+
+  return pointsByTeam
+}
+
+async function pushPoints (numberOfDays, endDate = new Date()) {
   const startDate = new Date()
   startDate.setDate(endDate.getDate() - numberOfDays)
   const start = getFormattedDate(startDate)
@@ -79,31 +100,7 @@ async function listPointsByTeam (numberOfDays, endDate = new Date()) {
   const path = '/api/v2/search/stories'
   const query = `?query=completed:${start}..${end}&page_size=25`
   const stories = await search(`${path}${query}`, [])
-
-  const storiesByTeam = {}
-  const pointsByTeam = {}
-  for (let i = 0; i < teams.length; i++) {
-    const team = teams[i].name
-
-    storiesByTeam[team] = {
-      feature: [],
-      chore: [],
-      bug: []
-    }
-
-    pointsByTeam[team] = {
-      feature: 0,
-      chore: 0,
-      bug: 0
-    }
-
-    stories.filter(story => {
-      return teams[i].project_ids.includes(story.project_id)
-    }).forEach(story => {
-      storiesByTeam[team][story.story_type] = story
-      pointsByTeam[team][story.story_type] += story.estimate || 0
-    })
-  }
+  const pointsByTeam = massagePointsByTeam(teams, stories)
 
   console.log('Pushing data to Google Sheets...')
   console.log(pointsByTeam)
@@ -114,9 +111,9 @@ clubhouse
   .version(version)
 
 clubhouse
-  .command('list-points <number-of-days> [end-date]')
-  .description('get story values for a specified number of days')
-  .action(listPointsByTeam)
+  .command('push-points <number-of-days> [end-date]')
+  .description('Push story point values to Google Sheets for a specified number of days')
+  .action(pushPoints)
 
 clubhouse
   .command('*')
