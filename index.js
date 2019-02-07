@@ -14,6 +14,14 @@ const sheets = google.sheets({ version: 'v4' })
 
 const userInput = readline.createInterface(process.stdin, process.stdout)
 
+authorizeGoogle(auth => google.options({ auth }))
+
+//const sheetIds = {
+//  Web: 1167460974,
+//  Design: 1514012959,
+//  Mobile: 2076622121
+//}
+
 function getFormattedDate (date) {
   const year = date.getFullYear()
   const month = ('0' + (date.getMonth() + 1)).slice(-2)
@@ -33,24 +41,50 @@ async function pushPointsToGoogleSheet (end, pointsByTeam) {
   for (const team in pointsByTeam) {
     const numberOfMembers = await question(`How many team members for ${team}? `)
     const { feature, chore, bug } = pointsByTeam[team]
-    authorizeGoogle(auth => {
-      const request = {
-        auth,
-        spreadsheetId: SPREADSHEET_ID,
-        valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        range: `${team}!A:D`,
-        resource: {
-          majorDimension: 'ROWS',
-          values: [
-            ['CLI', end, feature, chore, bug, numberOfMembers]
-          ]
-        }
+    const request = {
+      spreadsheetId: SPREADSHEET_ID,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      range: `${team}!A:D`,
+      resource: {
+        majorDimension: 'ROWS',
+        values: [
+          ['CLI', end, feature, chore, bug, numberOfMembers]
+        ]
       }
+    }
 
-      sheets.spreadsheets.values.append(request, (err, res) => {
-        if (err) return console.log('The API returned an error: ' + err)
-      })
+    sheets.spreadsheets.values.append(request, (err, res) => {
+      if (err) return console.log('The API returned an error: ' + err)
+    //  const request = {
+    //    spreadsheetId: SPREADSHEET_ID,
+    //    resource: {
+    //      requests: [{
+    //        copyPaste: {
+    //          source: {
+    //            sheetId: 0,
+    //            startRowIndex: 47,
+    //            endRowIndex: 47,
+    //            startColumnIndex: 6,
+    //            endColumnIndex: 9
+    //          },
+    //          destination: {
+    //            sheetId: 0,
+    //            startRowIndex: 48,
+    //            endRowIndex: 48,
+    //            startColumnIndex: 6,
+    //            endColumnIndex: 9
+    //          },
+    //          pasteType: 'PASTE_FORMAT',
+    //          pasteOrientation: 'NORMAL'
+    //        }
+    //      }]
+    //    }
+    //  }
+    //  sheets.spreadsheets.batchUpdate(request, (err, res) => {
+    //    if (err) return console.log('The API returned an error: ' + err)
+    //    console.log(res)
+    //  })
     })
   }
   console.log('Points successfully sent to Google Sheets :)')
