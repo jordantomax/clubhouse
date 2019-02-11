@@ -119,11 +119,11 @@ function massagePointsByTeam (teams, stories) {
   return pointsByTeam
 }
 
-async function pushPoints (numberOfDays, endDate = new Date()) {
+async function pushPoints (numberOfDays, endDate = getFormattedDate(new Date())) {
   const startDate = new Date()
-  startDate.setDate(endDate.getDate() - numberOfDays)
+  startDate.setDate(new Date(endDate).getDate() - (numberOfDays - 1))
   const start = getFormattedDate(startDate)
-  const end = getFormattedDate(endDate)
+  const end = endDate
   console.log(`Finding point values from ${start} to ${end}`)
   if (!TOKEN) return console.log('CLUBHOUSE_API_TOKEN environment variable is not set')
 
