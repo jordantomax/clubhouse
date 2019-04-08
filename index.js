@@ -16,16 +16,13 @@ const userInput = readline.createInterface(process.stdin, process.stdout)
 
 authorizeGoogle(auth => google.options({ auth }))
 
-//const sheetIds = {
-//  Web: 1167460974,
-//  Design: 1514012959,
-//  Mobile: 2076622121
-//}
-
 function getFormattedDate (date) {
   const year = date.getFullYear()
-  const month = ('0' + (date.getMonth() + 1)).slice(-2)
-  const day = ('0' + date.getDate()).slice(-2)
+  let month = date.getMonth() + 1
+  if (month < 10) month = '0' + month
+  let day = date.getDate()
+  if (day < 10) day = '0' + day
+
   return `${year}-${month}-${day}`
 }
 
@@ -56,35 +53,6 @@ async function pushPointsToGoogleSheet (end, pointsByTeam) {
 
     sheets.spreadsheets.values.append(request, (err, res) => {
       if (err) return console.log('The API returned an error: ' + err)
-    //  const request = {
-    //    spreadsheetId: SPREADSHEET_ID,
-    //    resource: {
-    //      requests: [{
-    //        copyPaste: {
-    //          source: {
-    //            sheetId: 0,
-    //            startRowIndex: 47,
-    //            endRowIndex: 47,
-    //            startColumnIndex: 6,
-    //            endColumnIndex: 9
-    //          },
-    //          destination: {
-    //            sheetId: 0,
-    //            startRowIndex: 48,
-    //            endRowIndex: 48,
-    //            startColumnIndex: 6,
-    //            endColumnIndex: 9
-    //          },
-    //          pasteType: 'PASTE_FORMAT',
-    //          pasteOrientation: 'NORMAL'
-    //        }
-    //      }]
-    //    }
-    //  }
-    //  sheets.spreadsheets.batchUpdate(request, (err, res) => {
-    //    if (err) return console.log('The API returned an error: ' + err)
-    //    console.log(res)
-    //  })
     })
   }
   console.log('Points successfully sent to Google Sheets :)')
@@ -121,7 +89,7 @@ function massagePointsByTeam (teams, stories) {
 
 async function pushPoints (numberOfDays, endDateString) {
   const startDate = new Date(endDateString)
-  startDate.setDate(startDate.getDate() - (numberOfDays - 1))
+  startDate.setDate(startDate.getDate() - numberOfDays)
   const endDate = new Date(endDateString)
   const start = getFormattedDate(startDate)
   const end = getFormattedDate(endDate)
