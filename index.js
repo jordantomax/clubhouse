@@ -119,21 +119,23 @@ function massagePointsByTeam (teams, stories) {
   return pointsByTeam
 }
 
-async function pushPoints (numberOfDays, endDate = getFormattedDate(new Date())) {
-  const startDate = new Date()
-  startDate.setDate(new Date(endDate).getDate() - (numberOfDays - 1))
+async function pushPoints (numberOfDays, endDateString) {
+  const startDate = new Date(endDateString)
+  startDate.setDate(startDate.getDate() - (numberOfDays - 1))
+  const endDate = new Date(endDateString)
   const start = getFormattedDate(startDate)
-  const end = endDate
-  console.log(`Finding point values from ${start} to ${end}`)
+  const end = getFormattedDate(endDate)
   if (!TOKEN) return console.log('CLUBHOUSE_API_TOKEN environment variable is not set')
 
   console.log('fetching teams...')
   const teams = await fetch(`${API_HOST}/api/v2/teams?token=${TOKEN}`).then(res => res.json())
 
-  console.log('fetching stories...')
+  console.log(`fetching stories from from ${start} to ${end}`)
   const path = '/api/v2/search/stories'
   const query = `?query=completed:${start}..${end}&page_size=25`
   const stories = await search(`${path}${query}`, [])
+
+  console.log('STORIES: ', `${path}${query}`)
   const pointsByTeam = massagePointsByTeam(teams, stories)
 
   console.log('Pushing data to Google Sheets...')
@@ -145,7 +147,7 @@ clubhouse
   .version(version)
 
 clubhouse
-  .command('push-points <number-of-days> [end-date]')
+  .command('push-points <number-of-days> [end-date-string]')
   .description('Push story point values to Google Sheets for a specified number of days')
   .action(pushPoints)
 
